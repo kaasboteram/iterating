@@ -153,6 +153,10 @@ pub fn Iterator(comptime Inner: type) type {
             return .{ .inner = .{ .first = self.inner, .second = other.inner } };
         }
 
+        pub fn zip(self: Self, other: anytype) Iterator(adapters.Zip(Inner, Clean(@TypeOf(other)))) {
+            return .{ .inner = .{ .a = self.inner, .b = other.inner } };
+        }
+
         pub fn toOwnedSlice(self: Self, gpa: std.mem.Allocator) ![]const Item {
             var list: std.ArrayList(Item) = .empty;
             errdefer list.deinit(gpa);
@@ -286,6 +290,31 @@ pub const adapters = struct {
                 return if (self.first.next()) |x| x else self.second.next();
             }
         };
+    }
+
+    pub fn Zip(comptime A: type, comptime B: type) type {
+        return struct {
+            a: A,
+            b: B,
+
+            pub const Item = struct { A.Item, B.Item };
+
+            const Self = @This();
+
+            pub fn next(self: *Self) ?Item {
+                const x = self.a.next() orelse return null;
+                const y = self.b.next() orelse return null;
+                return .{ x, y };
+            }
+        };
+    }
+
+    test Zip {
+        const testing = @import("std").testing;
+
+        var it = Iter(i32).once(10).zip(Iter(i32).once(20));
+
+        try testing.expectEqualDeep(struct { i32, i32 }{ 10, 20 }, it.next().?);
     }
 };
 
