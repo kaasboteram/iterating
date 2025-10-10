@@ -100,7 +100,7 @@ pub fn Iterator(comptime Inner: type) type {
             return .{ .inner = .{ .inner = self.inner } };
         }
 
-        pub fn fold(self: Self, init: anytype, f: anytype) @typeInfo(@TypeOf(f)).@"fn".return_type.? {
+        pub fn fold(self: Self, comptime T: type, init: T, f: anytype) T {
             var mutSelf = self;
             var acc = init;
             while (mutSelf.next()) |x| {
@@ -110,7 +110,7 @@ pub fn Iterator(comptime Inner: type) type {
         }
 
         pub fn count(self: Self) usize {
-            return self.fold(@as(usize, 0), struct {
+            return self.fold(usize, 0, struct {
                 fn inc(i: usize, _: Item) usize {
                     return i + 1;
                 }
@@ -118,7 +118,7 @@ pub fn Iterator(comptime Inner: type) type {
         }
 
         pub fn last(self: Self) ?Item {
-            return self.fold(@as(?Item, null), struct {
+            return self.fold(?Item, null, struct {
                 inline fn some(_: ?Item, x: Item) ?Item {
                     return x;
                 }
