@@ -1,5 +1,5 @@
 const std = @import("std");
-const iter = @import("iterating").iter;
+const iter = @import("iterating").Iter;
 
 pub fn main() !void {
     const arith = struct {

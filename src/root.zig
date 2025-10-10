@@ -1,6 +1,6 @@
 const std = @import("std");
 
-pub fn iter(comptime T: type) type {
+pub fn Iter(comptime T: type) type {
     return struct {
         pub fn fromSlice(slice: anytype) Iterator(
             if (@typeInfo(@TypeOf(slice)).pointer.is_const) SliceIterConst(T) else SliceIter(T),
@@ -22,7 +22,7 @@ pub fn iter(comptime T: type) type {
     };
 }
 
-test iter {
+test Iter {
     const testing = @import("std").testing;
 
     const gpa = testing.allocator;
@@ -34,12 +34,12 @@ test iter {
         }
     };
 
-    const items = try iter(i32)
+    const items = try Iter(i32)
         .once(-100)
-        .chain(iter(i32)
+        .chain(Iter(i32)
             .rangeInclusive(1, 100)
             .filter(arith.is_square)
-            .chain(iter(i32)
+            .chain(Iter(i32)
             .range(0, 10)))
         .toOwnedSlice(gpa);
 
@@ -147,12 +147,12 @@ pub fn Iterator(comptime Inner: type) type {
     };
 }
 
-fn Clean(comptime Iter: type) type {
-    if (@hasDecl(Iter, "_Inner")) {
-        if (Iterator(Iter._Inner) == Iter) return Iter._Inner;
+fn Clean(comptime It: type) type {
+    if (@hasDecl(It, "_Inner")) {
+        if (Iterator(It._Inner) == It) return It._Inner;
     }
 
-    return Iter;
+    return It;
 }
 
 pub const adapters = struct {
@@ -350,7 +350,7 @@ pub fn SliceIterConst(comptime T: type) type {
 
 test "slices" {
     const slice: []const i32 = &[_]i32{ -2, -1, 0, 1, 2 };
-    var it = iter(i32).fromSlice(slice).enumerate();
+    var it = Iter(i32).fromSlice(slice).enumerate();
 
     while (it.next()) |pair| {
         const i, const val = pair;
