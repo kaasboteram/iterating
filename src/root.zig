@@ -149,11 +149,11 @@ pub fn Iterator(comptime Inner: type) type {
             }.some);
         }
 
-        pub fn chain(self: Self, other: anytype) Iterator(adapters.Chain(Inner, Clean(@TypeOf(other)))) {
+        pub fn chain(self: Self, other: anytype) Iterator(adapters.Chain(Inner, @TypeOf(other)._Inner)) {
             return .{ .inner = .{ .first = self.inner, .second = other.inner } };
         }
 
-        pub fn zip(self: Self, other: anytype) Iterator(adapters.Zip(Inner, Clean(@TypeOf(other)))) {
+        pub fn zip(self: Self, other: anytype) Iterator(adapters.Zip(Inner, @TypeOf(other)._Inner)) {
             return .{ .inner = .{ .a = self.inner, .b = other.inner } };
         }
 
@@ -173,14 +173,6 @@ pub fn Iterator(comptime Inner: type) type {
             }
         }
     };
-}
-
-fn Clean(comptime It: type) type {
-    if (@hasDecl(It, "_Inner")) {
-        if (Iterator(It._Inner) == It) return It._Inner;
-    }
-
-    return It;
 }
 
 pub const adapters = struct {
