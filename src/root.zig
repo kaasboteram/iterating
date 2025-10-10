@@ -111,6 +111,24 @@ pub fn Iterator(comptime Inner: type) type {
             return acc;
         }
 
+        pub fn any(self: Self, f: fn (Item) bool) bool {
+            var mutSelf = self;
+            while (mutSelf.next()) |v| {
+                if (f(v)) return true;
+            }
+
+            return false;
+        }
+
+        pub fn all(self: Self, f: fn (Item) bool) bool {
+            var mutSelf = self;
+            while (mutSelf.next()) |v| {
+                if (!f(v)) return false;
+            }
+
+            return true;
+        }
+
         pub fn count(self: Self) usize {
             return self.fold(usize, 0, struct {
                 fn inc(i: usize, _: Item) usize {
