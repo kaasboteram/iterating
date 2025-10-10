@@ -36,11 +36,13 @@ test Iter {
 
     const items = try Iter(i32)
         .once(-100)
-        .chain(Iter(i32)
-            .rangeInclusive(1, 100)
-            .filter(arith.is_square)
-            .chain(Iter(i32)
-            .range(0, 10)))
+        .chain(
+            Iter(i32)
+                .rangeInclusive(1, 100)
+                .filter(arith.is_square)
+                .chain(Iter(i32)
+                .range(0, 10)),
+        )
         .toOwnedSlice(gpa);
 
     defer gpa.free(items);
