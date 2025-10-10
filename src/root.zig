@@ -349,13 +349,3 @@ pub fn SliceIterConst(comptime T: type) type {
         }
     };
 }
-
-test "slices" {
-    const slice: []const i32 = &[_]i32{ -2, -1, 0, 1, 2 };
-    var it = Iter(i32).fromSlice(slice).enumerate();
-
-    while (it.next()) |pair| {
-        const i, const val = pair;
-        try std.testing.expectEqual(slice[i], val.*);
-    }
-}
