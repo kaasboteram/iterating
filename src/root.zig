@@ -19,6 +19,10 @@ pub fn Iter(comptime T: type) type {
         pub fn once(value: T) Iterator(Once(T)) {
             return .{ .inner = .{ .value = value } };
         }
+
+        pub fn empty() Iterator(Empty(T)) {
+            return .{ .inner = .{} };
+        }
     };
 }
 
@@ -366,4 +370,22 @@ pub fn SliceIterConst(comptime T: type) type {
             return &self.slice[self.index];
         }
     };
+}
+
+pub fn Empty(comptime T: type) type {
+    return struct {
+        pub const Item = T;
+
+        pub fn next(_: Empty(T)) ?Item {
+            return null;
+        }
+    };
+}
+
+test Empty {
+    const testing = @import("std").testing;
+
+    var it = Iter(i32).empty();
+
+    try testing.expectEqual(null, it.next());
 }
