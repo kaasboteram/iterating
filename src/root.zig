@@ -22,6 +22,36 @@ pub fn iter(comptime T: type) type {
     };
 }
 
+test iter {
+    const testing = @import("std").testing;
+
+    const gpa = testing.allocator;
+
+    const arith = struct {
+        fn is_square(x: i32) bool {
+            const sqrt = @sqrt(@as(f32, @floatFromInt(x)));
+            return sqrt == @floor(sqrt);
+        }
+    };
+
+    const items = try iter(i32)
+        .once(-100)
+        .chain(iter(i32)
+            .rangeInclusive(1, 100)
+            .filter(arith.is_square)
+            .chain(iter(i32)
+            .range(0, 10)))
+        .toOwnedSlice(gpa);
+
+    defer gpa.free(items);
+
+    try testing.expectEqualSlices(
+        i32,
+        &[_]i32{ -100, 1, 4, 9, 16, 25, 36, 49, 64, 81, 100, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 },
+        items,
+    );
+}
+
 pub fn Iterator(comptime Inner: type) type {
     return struct {
         inner: Inner,
