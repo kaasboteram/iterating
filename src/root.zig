@@ -23,6 +23,14 @@ pub fn Iter(comptime T: type) type {
         pub fn empty() Iterator(Empty(T)) {
             return .{ .inner = .{} };
         }
+
+        test empty {
+            const testing = @import("std").testing;
+
+            var it = Iter(i32).empty();
+
+            try testing.expectEqual(null, it.next());
+        }
     };
 }
 
@@ -155,6 +163,14 @@ pub fn Iterator(comptime Inner: type) type {
 
         pub fn zip(self: Self, other: anytype) Iterator(adapters.Zip(Inner, @TypeOf(other)._Inner)) {
             return .{ .inner = .{ .a = self.inner, .b = other.inner } };
+        }
+
+        test zip {
+            const testing = @import("std").testing;
+
+            var it = Iter(i32).once(10).zip(Iter(i32).once(20));
+
+            try testing.expectEqualDeep(struct { i32, i32 }{ 10, 20 }, it.next().?);
         }
 
         pub fn toOwnedSlice(self: Self, gpa: std.mem.Allocator) ![]const Item {
@@ -300,14 +316,6 @@ pub const adapters = struct {
             }
         };
     }
-
-    test Zip {
-        const testing = @import("std").testing;
-
-        var it = Iter(i32).once(10).zip(Iter(i32).once(20));
-
-        try testing.expectEqualDeep(struct { i32, i32 }{ 10, 20 }, it.next().?);
-    }
 };
 
 pub fn Range(comptime T: type) type {
@@ -401,12 +409,4 @@ pub fn Empty(comptime T: type) type {
             return null;
         }
     };
-}
-
-test Empty {
-    const testing = @import("std").testing;
-
-    var it = Iter(i32).empty();
-
-    try testing.expectEqual(null, it.next());
 }
