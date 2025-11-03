@@ -37,7 +37,7 @@ pub fn Iter(comptime T: type) type {
 test Iter {
     const testing = @import("std").testing;
 
-    const gpa = testing.allocator;
+    const allocator = testing.allocator;
 
     const arith = struct {
         fn is_square(x: i32) bool {
@@ -55,9 +55,9 @@ test Iter {
                 .chain(Iter(i32)
                 .range(0, 10)),
         )
-        .toOwnedSlice(gpa);
+        .toOwnedSlice(allocator);
 
-    defer gpa.free(items);
+    defer allocator.free(items);
 
     try testing.expectEqualSlices(
         i32,
@@ -173,19 +173,19 @@ pub fn Iterator(comptime Inner: type) type {
             try testing.expectEqualDeep(struct { i32, i32 }{ 10, 20 }, it.next().?);
         }
 
-        pub fn toOwnedSlice(self: Self, gpa: std.mem.Allocator) ![]const Item {
+        pub fn toOwnedSlice(self: Self, allocator: std.mem.Allocator) ![]const Item {
             var list: std.ArrayList(Item) = .empty;
-            errdefer list.deinit(gpa);
+            errdefer list.deinit(allocator);
 
-            try self.collectInto(&list, gpa);
+            try self.collectInto(&list, allocator);
 
-            return try list.toOwnedSlice(gpa);
+            return try list.toOwnedSlice(allocator);
         }
 
-        pub fn collectInto(self: Self, list: *std.ArrayList(Item), gpa: std.mem.Allocator) !void {
+        pub fn collectInto(self: Self, list: *std.ArrayList(Item), allocator: std.mem.Allocator) !void {
             var mutSelf = self;
             while (mutSelf.next()) |val| {
-                try list.append(gpa, val);
+                try list.append(allocator, val);
             }
         }
     };
