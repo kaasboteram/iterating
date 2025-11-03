@@ -168,7 +168,7 @@ pub fn Iterator(comptime Inner: type) type {
 
             var it = Iter(i32).once(10).zip(Iter(i32).once(20));
 
-            try testing.expectEqualDeep(struct { i32, i32 }{ 10, 20 }, it.next().?);
+            try testing.expectEqualDeep(.{ 10, 20 }, it.next());
         }
 
         pub fn toOwnedSlice(self: Self, allocator: std.mem.Allocator) ![]const Item {
