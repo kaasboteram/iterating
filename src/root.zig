@@ -20,14 +20,12 @@ pub fn Iter(comptime T: type) type {
             return .{ .inner = .{ .value = value } };
         }
 
-        pub fn empty() Iterator(Empty(T)) {
-            return .{ .inner = .{} };
-        }
+        pub const empty: Iterator(Empty(T)) = .{ .inner = .{} };
 
         test empty {
             const testing = @import("std").testing;
 
-            var it = Iter(i32).empty();
+            var it = Iter(i32).empty;
 
             try testing.expectEqual(null, it.next());
         }
