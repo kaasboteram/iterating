@@ -8,6 +8,22 @@ pub fn Iter(comptime T: type) type {
             return .{ .inner = .{ .slice = slice } };
         }
 
+        pub fn fromSliceOwned(slice: []const T) Iterator(SliceIterOwned(T)) {
+            return .{ .inner = .{ .slice = slice } };
+        }
+
+        test fromSliceOwned {
+            const testing = @import("std").testing;
+
+            var iter = Iter(i32).fromSliceOwned(&.{ 1, 3, 2, 4 });
+
+            try testing.expectEqual(1, iter.next());
+            try testing.expectEqual(3, iter.next());
+            try testing.expectEqual(2, iter.next());
+            try testing.expectEqual(4, iter.next());
+            try testing.expectEqual(null, iter.next());
+        }
+
         pub fn range(start: T, end: T) Iterator(Range(T)) {
             return .{ .inner = .{ .current = start, .end = end } };
         }
@@ -395,6 +411,23 @@ pub fn SliceIterConst(comptime T: type) type {
             if (self.index >= self.slice.len) return null;
             defer self.index += 1;
             return &self.slice[self.index];
+        }
+    };
+}
+
+pub fn SliceIterOwned(comptime T: type) type {
+    return struct {
+        slice: []const T,
+        index: usize = 0,
+
+        pub const Item = T;
+
+        const Self = @This();
+
+        pub fn next(self: *Self) ?Item {
+            if (self.index >= self.slice.len) return null;
+            defer self.index += 1;
+            return self.slice[self.index];
         }
     };
 }
