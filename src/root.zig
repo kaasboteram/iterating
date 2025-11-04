@@ -182,9 +182,13 @@ pub fn Iterator(comptime Inner: type) type {
         test zip {
             const testing = @import("std").testing;
 
-            var it = Iter(i32).once(10).zip(Iter(i32).once(20));
+            var it = Iter(i32).fromSliceOwned(&.{ 1, 2, 3 })
+                .zip(Iter(i32).fromSliceOwned(&.{ 4, 5, 6 }));
 
-            try testing.expectEqualDeep(.{ 10, 20 }, it.next());
+            try testing.expectEqualDeep(.{ 1, 4 }, it.next());
+            try testing.expectEqualDeep(.{ 2, 5 }, it.next());
+            try testing.expectEqualDeep(.{ 3, 6 }, it.next());
+            try testing.expectEqualDeep(null, it.next());
         }
 
         pub fn toOwnedSlice(self: Self, allocator: std.mem.Allocator) ![]const Item {
